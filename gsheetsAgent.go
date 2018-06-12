@@ -30,6 +30,17 @@ func (agent GAgent) GetClient(ctx context.Context, config *oauth2.Config) *http.
 	}
 	return config.Client(ctx, tok)
 }
+func (agent GAgent) HasCacheFile() bool {
+	cacheFile, err := agent.tokenCacheFile()
+	if err != nil {
+		log.Fatalf("Unable to get path to cached credential file. %v", err)
+		return false
+	}
+	if _, err := tokenFromFile(cacheFile); err != nil {
+		return false
+	}
+	return true
+}
 
 func (agent GAgent) tokenCacheFile() (string, error) {
 	tokenCacheDir := filepath.Join(agent.root, "credentials")
