@@ -2,18 +2,24 @@ package asheets
 
 import (
 	"fmt"
-	"log"
 
 	sheets "google.golang.org/api/sheets/v4"
 )
 
+type TableMap struct {
+	ColIds   []string
+	RowIds   []string
+	RowValue map[string][]string
+}
+
 /*ReadSheet */
-func ReadSheet(title string, srv *sheets.Service, spreadsheetId string, idCol string) ([]string, []string, map[string][]string) {
+func ReadSheet(title string, srv *sheets.Service, spreadsheetId string, idCol string) (*TableMap, error) {
 	idIndex := ColNameToNumber(idCol) - 1
 	readRange := title + "!A1:ZZ"
 	resp, err := srv.Spreadsheets.Values.Get(spreadsheetId, readRange).Do()
 	if err != nil {
-		log.Fatalf("Unable to retrieve data from sheet. %v", err)
+		//log.Fatalf("Unable to retrieve data from sheet. %v", err)
+		return nil, err
 	}
 	r := make(map[string][]string)
 	var header []string
@@ -40,5 +46,6 @@ func ReadSheet(title string, srv *sheets.Service, spreadsheetId string, idCol st
 	} else {
 		fmt.Print("No data found.")
 	}
-	return header, rowid, r
+	m := &TableMap{header, rowid, r}
+	return m, nil
 }
